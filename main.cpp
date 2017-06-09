@@ -4,6 +4,7 @@
 #include <vector>
 #include <algorithm>
 #include <math.h>
+#include <iomanip>
 
 using namespace std;
 
@@ -20,12 +21,15 @@ private:
 	vector<Fasta> table;
 
 	static void setFrequency(Fasta f){
-		int gcCount;
+		int gcCount = 0;
 		for(int i = 0; i < f.dna.length(); ++i){
 			if(f.dna.at(i) == 'G' or f.dna.at(i) == 'C')
 				gcCount++;
 		}
-		f.frequency = ceil((double)gcCount/f.dna.length())/100;	
+		cout << "\nDivision: " << ((double)gcCount/f.dna.length())*100 << '\n'; 
+		f.frequency = ((double)gcCount/f.dna.length())*100;
+		cout << "ID: " << f.id << '\n'; 
+		cout << "Frequency: " << f.frequency << '\n';
 	}
 
 	void resetInputFileStream(ifstream& fin){
@@ -34,18 +38,6 @@ private:
 	}
 
 public:
-	void setTable(){
-		for(int i = 0; i < dataset.length(); i++){
-			if(dataset.at(i) == '>'){
-				Fasta currentFasta;
-				currentFasta.id = dataset.substr(i+1,i+13);
-				cout << "\nConditional char: " << dataset.at(i) << '\n';
-				cout << "Fasta ID: " << currentFasta.id;
-			}
-		}
-
-	}
-
 	void calculateGC(){
 		for_each(table.begin(), table.end(), setFrequency); 
 	}
@@ -65,6 +57,7 @@ public:
 			}
 			table.push_back(f);
 		}
+		calculateGC(); // Faulty function
 	}
 
 	void printTable(){
@@ -72,8 +65,9 @@ public:
 	}
 
 	static void printFasta(Fasta f){
+		//cout << fixed; // Clean up precision, leaving open for testing. 
+		//setprecision(2);
 		cout << '\n' << f.id;
-		cout << '\n' << f.dna;
 		cout << '\n' << f.frequency << '\n';
 	}
 
@@ -89,18 +83,6 @@ public:
 	}
 
 	GCContentCalculator(){dataset = "";}	
-
-	void setDataset(ifstream& fin){
-		while(fin){	
-			string currentLine;
-			getline(fin, currentLine); 
-			dataset = dataset + '\n' + currentLine;
-		}
-	}
-
-	string getDataset(){
-		return dataset;
-	}
 
 };
 
