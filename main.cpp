@@ -2,6 +2,9 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <algorithm>
+#include <math.h>
+
 using namespace std;
 
 class GCContentCalculator{
@@ -11,8 +14,24 @@ private:
 	struct Fasta{
 		string id;
 		string dna;
+		double frequency;
 	};
+
 	vector<Fasta> table;
+
+	static void setFrequency(Fasta f){
+		int gcCount;
+		for(int i = 0; i < f.dna.length(); ++i){
+			if(f.dna.at(i) == 'G' or f.dna.at(i) == 'C')
+				gcCount++;
+		}
+		f.frequency = ceil((double)gcCount/f.dna.length())/100;	
+	}
+
+	void resetInputFileStream(ifstream& fin){
+		fin.clear();
+		fin.seekg(0, std::ios::beg);
+	}
 
 public:
 	void setTable(){
@@ -27,21 +46,35 @@ public:
 
 	}
 
+	void calculateGC(){
+		for_each(table.begin(), table.end(), setFrequency); 
+	}
+
 	void popTable(ifstream& fin){
-		//table.resize(getFastaCount(fin));	
-		for(int i = 0; i < getFastaCount(fin); i++){
+		int max = getFastaCount(fin);
+		resetInputFileStream(fin);
+		for(int i = 0; i <= max; i++){
 			Fasta f;
+			string s;
 			getline(fin,f.id);
-			getline(fin,f.dna);
+			while(fin.peek() != '>' and fin){ 
+				char c = fin.peek();
+				string temp;
+				getline(fin,temp);
+				f.dna += temp;
+			}
 			table.push_back(f);
 		}
 	}
 
 	void printTable(){
-		for(int i = 0; i < table.size(); i++){
-			cout << table.at(i).id;
-			cout << '\n' << table.at(i).dna;
-		}
+		for_each(table.begin(), table.end(), printFasta);
+	}
+
+	static void printFasta(Fasta f){
+		cout << '\n' << f.id;
+		cout << '\n' << f.dna;
+		cout << '\n' << f.frequency << '\n';
 	}
 
 	int getFastaCount(ifstream& fin){
@@ -74,11 +107,8 @@ public:
 int main(int, char *argv[]){	
 	ifstream fin;
 	GCContentCalculator gcalc; 
-	fin.open(argv[1]);
+	//fin.open(argv[1]);
+	fin.open("test.txt");
 	gcalc.popTable(fin);
 	gcalc.printTable();
-	//gcalc.setDataset(fin);
-	//gcalc.setTable();
-	//cout << "\n\n";
-	//cout << gcalc.getDataset();
 }
