@@ -20,16 +20,14 @@ private:
 
 	vector<Fasta> table;
 
-	static void setFrequency(Fasta f){
+	static void setFrequency(Fasta& f){
+		if(f.dna.length() == 0) return;
 		int gcCount = 0;
 		for(int i = 0; i < f.dna.length(); ++i){
 			if(f.dna.at(i) == 'G' or f.dna.at(i) == 'C')
 				gcCount++;
 		}
-		cout << "\nDivision: " << ((double)gcCount/f.dna.length())*100 << '\n'; 
 		f.frequency = ((double)gcCount/f.dna.length())*100;
-		cout << "ID: " << f.id << '\n'; 
-		cout << "Frequency: " << f.frequency << '\n';
 	}
 
 	void resetInputFileStream(ifstream& fin){
@@ -58,6 +56,7 @@ public:
 			table.push_back(f);
 		}
 		calculateGC(); // Faulty function
+		table.pop_back();
 	}
 
 	void printTable(){
@@ -65,8 +64,6 @@ public:
 	}
 
 	static void printFasta(Fasta f){
-		//cout << fixed; // Clean up precision, leaving open for testing. 
-		//setprecision(2);
 		cout << '\n' << f.id;
 		cout << '\n' << f.frequency << '\n';
 	}
